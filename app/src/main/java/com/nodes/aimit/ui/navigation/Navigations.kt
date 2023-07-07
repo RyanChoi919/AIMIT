@@ -1,4 +1,4 @@
-package com.nodes.aimit.ui.components
+package com.nodes.aimit.ui.navigation
 
 import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
@@ -9,39 +9,32 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-
-private val navBarItems = listOf(
-    NavBarItem("Today", Icons.Rounded.Home),
-    NavBarItem("Goal", Icons.Rounded.Star),
-    NavBarItem("Settings", Icons.Rounded.Settings)
-)
+import androidx.compose.ui.res.stringResource
 
 @Composable
-fun NavBar() {
-    var selectedIndex by rememberSaveable { mutableStateOf(0) }
-
+fun AimitNavBar(
+    selectedDestination: String,
+    navigateToTopLevelDestination: (AimitTopLevelDestination) -> Unit
+) {
     NavigationBar() {
-        navBarItems.forEachIndexed { index, navBarItem ->
+        TOP_LEVEL_DESTINATIONS.forEach { destination ->
             NavigationBarItem(
-                selected = index == selectedIndex,
-                onClick = { /*TODO*/ },
-                label = { Text(navBarItem.name) },
+                selected = selectedDestination == destination.route,
+                onClick = { navigateToTopLevelDestination(destination) },
+                label = { Text(stringResource(id = destination.labelResId)) },
                 icon = {
                     Image(
-                        imageVector = navBarItem.icon,
-                        contentDescription = "${navBarItem.name} icon"
+                        imageVector = destination.icon,
+                        contentDescription = "${stringResource(id = destination.labelResId)} icon"
                     )
                 })
         }
     }
 }
-
-data class NavBarItem(
-    val name: String,
-    val icon: ImageVector
-)

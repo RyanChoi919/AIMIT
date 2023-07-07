@@ -1,4 +1,4 @@
-package com.nodes.aimit.ui.screens.today
+package com.nodes.aimit.ui.screens
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
