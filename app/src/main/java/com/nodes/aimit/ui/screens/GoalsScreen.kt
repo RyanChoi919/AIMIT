@@ -24,7 +24,7 @@ fun GoalScreen(modifier: Modifier = Modifier) {
     ) {
         LazyColumn(Modifier.padding(4.dp)) {
             itemsIndexed(items = goals) { index, goal ->
-                GoalListItem(name = "$goal $index")
+                GoalListItem(name = "$goal $index", onClick = {})
             }
         }
     }

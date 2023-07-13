@@ -1,5 +1,6 @@
 package com.nodes.aimit.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,8 +29,8 @@ private fun ListCard(modifier: Modifier = Modifier, content: @Composable ColumnS
 }
 
 @Composable
-fun GoalListItem(name: String) {
-    ListCard() {
+fun GoalListItem(name: String, onClick: () -> Unit) {
+    ListCard(Modifier.clickable(onClick = onClick)) {
         Text(name, Modifier.padding(defaultInnerPadding))
     }
 }
@@ -59,7 +60,9 @@ fun TaskListItem() {
 @Composable
 private fun GoalListItemPreview() {
     AIMITTheme {
-        GoalListItem("Goal List")
+        GoalListItem("Goal List") {
+            // do nothing })
+        }
     }
 }
 
