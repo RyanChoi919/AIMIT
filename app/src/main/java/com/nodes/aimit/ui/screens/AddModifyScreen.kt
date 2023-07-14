@@ -1,28 +1,24 @@
 package com.nodes.aimit.ui.screens
 
 import android.app.DatePickerDialog
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,11 +30,11 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,12 +44,9 @@ import com.nodes.aimit.R
 import com.nodes.aimit.domain.model.ContentType
 import com.nodes.aimit.domain.model.GoalType
 import com.nodes.aimit.ui.theme.AIMITTheme
-import com.nodes.aimit.utils.LogCompositions
 import com.nodes.aimit.utils.StringUtils
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Locale
 
@@ -73,7 +66,7 @@ private fun AddModifyGoalContent(modifier: Modifier = Modifier) {
     var goalName by rememberSaveable { mutableStateOf("") }
     val startDate = rememberSaveable { mutableStateOf(LocalDate.now()) }
     val endDate = rememberSaveable { mutableStateOf(LocalDate.now().plusDays(1)) }
-    var selectedGoalType by rememberSaveable { mutableStateOf(GoalType.AVERAGE) }
+    var selectedGoalType by rememberSaveable { mutableStateOf(GoalType.TARGET) }
     var startValue by rememberSaveable { mutableStateOf(0) }
     var targetValue by rememberSaveable { mutableStateOf(0) }
     var unit by rememberSaveable { mutableStateOf("") }
@@ -110,7 +103,7 @@ private fun AddModifyGoalContent(modifier: Modifier = Modifier) {
                 minDate = startDate
             )
 
-            Text(text = "Goal Type", modifier = Modifier.padding(16.dp))
+            Text(text = "Goal Type", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
             RadioButtonGroup(modifier = Modifier.padding(16.dp), options = listOf(
                 listOf(GoalType.TARGET, GoalType.AVERAGE),
@@ -134,9 +127,18 @@ private fun AddModifyGoalContent(modifier: Modifier = Modifier) {
                     TextField(
                         modifier = textFieldModifier,
                         value = unit,
-                        onValueChange = { it -> unit = it },
+                        onValueChange = { unit = it },
                         label = { Text(stringResource(id = R.string.unit)) },
                     )
+
+                    if (startValue - targetValue != 0) {
+                        val dateDiff = ChronoUnit.DAYS.between(startDate.value, endDate.value).toDouble()
+                        val pace = (targetValue - startValue) / dateDiff
+                        InformationText(
+                            modifier = textFieldModifier,
+                            value = "Your daily goal is ${String.format("%.1f",pace)} $unit"
+                        )
+                    }
                 }
 
                 GoalType.AVERAGE -> {
@@ -169,7 +171,7 @@ private fun AddModifyHabitContent(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
-        Row() {
+        Row {
             Text(text = "Add Modify Habit Screen")
         }
     }
@@ -180,7 +182,7 @@ private fun AddModifyRoutineContent(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
-        Row() {
+        Row {
             Text(text = "Add Modify Routine Screen")
         }
     }
@@ -191,7 +193,7 @@ private fun AddModifyTaskContent(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
-        Row() {
+        Row {
             Text(text = "Add Modify Task Screen")
         }
     }
@@ -200,7 +202,7 @@ private fun AddModifyTaskContent(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun AddModifyGoalScreenPreview() {
-    AIMITTheme() {
+    AIMITTheme {
         AddModifyScreen(contentType = ContentType.GOAL)
     }
 }
@@ -256,7 +258,7 @@ private inline fun <reified T> RadioButtonGroup(
 private fun IntTextField(
     modifier: Modifier = Modifier, value: Int, labelResId: Int, onValueChanged: (Int) -> Unit
 ) {
-    var text by remember { mutableStateOf(value.toString()) }
+    var text by remember { mutableStateOf("") }
 
     TextField(
         modifier = modifier,
@@ -266,7 +268,8 @@ private fun IntTextField(
             onValueChanged(it.toIntOrNull() ?: 0)
         },
         label = { Text(stringResource(id = labelResId)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true
     )
 }
 
@@ -290,19 +293,19 @@ private fun DatePickerTextField(
         onClick = {
             DatePickerDialog(
                 context, { _, year, month, dayOfMonth ->
-                    val updatedDate = LocalDate.of(year, month - 1, dayOfMonth)
+                    val updatedDate = LocalDate.of(year, month + 1, dayOfMonth)
                     date.value = updatedDate
                     onDateUpdated(date.value)
                 },
                 date.value.year,
-                date.value.monthValue + 1,
+                date.value.monthValue - 1,
                 date.value.dayOfMonth
             ).apply {
                 if (minDate != null) {
                     val minCalendar = Calendar.getInstance()
                     minCalendar.set(
                         minDate.value.year,
-                        minDate.value.monthValue + 1,
+                        minDate.value.monthValue - 1,
                         minDate.value.dayOfMonth
                     )
                     this.datePicker.minDate = minCalendar.timeInMillis
@@ -365,7 +368,7 @@ private fun ClickableTextField(
         readOnly = true,
         interactionSource = remember { MutableInteractionSource() }.also { interactionSource ->
             LaunchedEffect(interactionSource) {
-                interactionSource.interactions.collect() {
+                interactionSource.interactions.collect {
                     if (it is PressInteraction.Release) {
                         onClick()
                     }
@@ -375,4 +378,29 @@ private fun ClickableTextField(
         label = label,
         trailingIcon = trailingIcon
     )
+}
+
+@Composable
+private fun InformationText(
+    modifier: Modifier = Modifier,
+    value: String
+) {
+    Row(
+        modifier = modifier.alpha(0.7f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(end = 4.dp)
+                .size(16.dp)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelLarge
+        )
+
+    }
+
 }

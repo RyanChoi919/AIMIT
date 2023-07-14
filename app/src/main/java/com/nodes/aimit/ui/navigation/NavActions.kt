@@ -9,29 +9,48 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.nodes.aimit.R
 
-object AimitNavRoutes {
-    const val TODAY = "nav_route_today"
-    const val GOALS = "nav_route_goals"
-    const val SETTINGS = "nav_route_settings"
-    const val ADD_MODIFY = "nav_route_add_modify"
-    const val DETAIL = "nav_route_detail"
+enum class AimitDestination(
+    val route: String, val shouldShowFab: Boolean = false, val shouldShowBnv: Boolean = true
+) {
+    TODAY(
+        "nav_route_today",
+        true
+    ),
+    GOALS("nav_route_goals"), SETTINGS("nav_route_settings"), ADD_MODIFY(
+        "nav_route_add_modify",
+        shouldShowBnv = false
+    ),
+    DETAIL("nav_route_detail", shouldShowBnv = false);
+
+
+    companion object {
+        fun getDestinationByRoute(route: String?): AimitDestination? {
+            return route?.let { AimitDestination.values().find { it.route == route } }
+        }
+    }
 }
 
 data class AimitTopLevelDestination(
-    val route: String,
-    val labelResId : Int,
-    val icon: ImageVector
+    val destination: AimitDestination, val labelResId: Int, val icon: ImageVector
 )
 
 val TOP_LEVEL_DESTINATIONS = listOf(
-    AimitTopLevelDestination(AimitNavRoutes.TODAY, R.string.destination_label_today, Icons.Default.DateRange),
-    AimitTopLevelDestination(AimitNavRoutes.GOALS, R.string.destination_label_goals, Icons.Default.Star),
-    AimitTopLevelDestination(AimitNavRoutes.SETTINGS, R.string.destination_label_settings, Icons.Default.Settings)
+    AimitTopLevelDestination(
+        AimitDestination.TODAY, R.string.destination_label_today, Icons.Default.DateRange
+    ), AimitTopLevelDestination(
+        AimitDestination.GOALS, R.string.destination_label_goals, Icons.Default.Star
+    ), AimitTopLevelDestination(
+        AimitDestination.SETTINGS, R.string.destination_label_settings, Icons.Default.Settings
+    )
 )
 
 class NavActions(private val navController: NavHostController) {
-    fun navigateTo(destination : AimitTopLevelDestination) {
-        navController.navigate(destination.route) {
+    fun navigateTo(destination: AimitDestination) {
+        navController.navigate(destination.route)
+    }
+
+    fun navigateTo(destination: AimitTopLevelDestination) {
+        navController.navigate(destination.destination.route) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
