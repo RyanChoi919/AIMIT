@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nodes.aimit.ui.navigation.AimitDestination
 import com.nodes.aimit.ui.navigation.AimitNavBar
+import com.nodes.aimit.ui.navigation.AimitTopBar
 import com.nodes.aimit.ui.navigation.NavActions
 import com.nodes.aimit.ui.theme.AIMITTheme
 
@@ -41,19 +42,26 @@ fun AimitAppScreen() {
 
     Log.d(TAG, "AimitAppScreen: ${selectedDestination.route}")
 
-    Scaffold(bottomBar = {
-        if (selectedDestination.shouldShowBnv) {
-            AimitNavBar(selectedDestination.route, navActions::navigateTo)
-        }
-    }, floatingActionButton = {
-        if (selectedDestination.shouldShowFab) {
-            FloatingActionButton(onClick = { navActions.navigateTo(AimitDestination.ADD_MODIFY) }) {
-                Icon(
-                    imageVector = Icons.Default.Add, contentDescription = null
-                )
+    Scaffold(
+        topBar = {
+            AimitTopBar(
+                selectedDestination = selectedDestination,
+                navController = navController
+            )
+        },
+        bottomBar = {
+            if (selectedDestination.shouldShowBnv) {
+                AimitNavBar(selectedDestination.route, navActions::navigateTo)
             }
-        }
-    }, floatingActionButtonPosition = FabPosition.End
+        }, floatingActionButton = {
+            if (selectedDestination.shouldShowFab) {
+                FloatingActionButton(onClick = { navActions.navigateTo(AimitDestination.ADD_MODIFY) }) {
+                    Icon(
+                        imageVector = Icons.Default.Add, contentDescription = null
+                    )
+                }
+            }
+        }, floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier

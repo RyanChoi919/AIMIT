@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "habits")
 data class Habit(
     @PrimaryKey(autoGenerate = true)
-    val id : Int,
-    val name: String
-)
+    override val id : Long,
+    override val name: String
+) : AimitEntity(id, name)

@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "goals")
 data class Goal(
-    @PrimaryKey(autoGenerate = true)
-    val id : Int,
-    val name: String
-)
+    @PrimaryKey
+    override val id: Long,
+    override val name: String
+) : AimitEntity(id, name)
